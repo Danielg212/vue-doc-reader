@@ -1,6 +1,6 @@
 {
   "name": "vue-doc-reader",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "file input reader for docs",
   "main": "dist/vue-doc-reader.ssr.js",
   "browser": "dist/vue-doc-reader.esm.js",
