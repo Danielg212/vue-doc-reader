@@ -1,19 +1,28 @@
 <template>
   <div class="vue-doc-reader"> 
-     <label for="file">Spreadsheet</label>
+     <label for="file" v-if="label">Spreadsheet</label>
      <input type="file" class="form-control" id="file" :accept="SheetJSFT" @change.prevent="readFile($event)" />
+     <div> {{fileSize}}</div>
+    
   </div>
 </template>
 <script lang="ts">
   import Vue from 'vue';
   import Component from 'vue-class-component';
+  import {Prop} from "vue-property-decorator";
+
   import * as XLSX from 'xlsx';
 
   @Component({})
   export default class VueDocReaderComponent extends Vue {
 
+  @Prop({default: false}) visible!: boolean
+  @Prop({default: null}) label!: string;
+
+
   private data:Array<any> = new Array<any>()
   private headers:Array<string> = new Array<string>()
+  public fileSize:string | undefined = '';
 
 
   SheetJSFT = [
@@ -36,10 +45,12 @@ readFile(event: any) {
   }
 
   processFile(file: File) {
-    var reader = new FileReader();
+    let reader = new FileReader()
+    this.fileSize = this.clcFileSize(file.size)
+    
     reader.onload = (e: any) => {
-      var data = e.target.result;
-      var workbook = XLSX.read(data, {
+      let data = e.target.result;
+      let workbook = XLSX.read(data, {
         type: 'binary'
       });
 
@@ -78,6 +89,16 @@ readFile(event: any) {
     }
     return headers;
   }
+
+  clcFileSize(number:number) {
+  if(number < 1024) {
+    return number + 'bytes';
+  } else if(number >= 1024 && number < 1048576) {
+    return (number/1024).toFixed(1) + 'KB';
+  } else if(number >= 1048576) {
+    return (number/1048576).toFixed(1) + 'MB';
+  }
+}
 
     
   }
