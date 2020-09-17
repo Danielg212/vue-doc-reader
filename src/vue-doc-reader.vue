@@ -10,14 +10,14 @@
   import Vue from 'vue';
   import Component from 'vue-class-component';
   import {Prop} from "vue-property-decorator";
-
   import * as XLSX from 'xlsx';
 
   @Component({})
   export default class VueDocReaderComponent extends Vue {
 
-  @Prop({default: false}) visible!: boolean
   @Prop({default: null}) label!: string;
+  @Prop(Boolean) includeRows!:boolean
+
 
 
   private data:Array<any> = new Array<any>()
@@ -26,7 +26,7 @@
 
 
   SheetJSFT = [
-    "xlsx", "xlsb", "xlsm", "xls", "xml", "csv", "txt", "ods", "fods", "uos", "sylk", "dif", "dbf", "prn", "qpw", "123", "wb*", "wq*", "html", "htm"
+    "xlsx", "xlsb", "xlsm", "xls", "xml", "csv"
   ].map(function(x) { return "." + x; }).join(",");
 
   make_cols = (refstr:Array<string>) => refstr.map((item:any)=> {return {text:item,value:item}})
@@ -46,26 +46,31 @@ readFile(event: any) {
 
   processFile(file: File) {
     let reader = new FileReader()
+    let XL_row_object:any
+    let cols:any
     this.fileSize = this.clcFileSize(file.size)
-    
+  
     reader.onload = (e: any) => {
-      let data = e.target.result;
+      let data = e.target.result
       let workbook = XLSX.read(data, {
         type: 'binary'
       });
-
       workbook.SheetNames.forEach((sheetName) => {
-        var XL_row_object = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName],);
-        var cols = this.get_header_row(workbook.Sheets[sheetName])
-        this.data = XL_row_object;
-        this.headers = cols;
+        XL_row_object = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName])
+        cols = this.get_header_row(workbook.Sheets[sheetName])
       })
 
-      reader.onloadend = () => {
-        this.$emit('onLoad', {data: this.data, headers: this.headers})
+      if(this.includeRows){
+        XL_row_object.forEach((value:any, index:number) => value.rowIndex = index)
       }
 
+      this.data = XL_row_object;
+      this.headers = cols;
     };
+
+    reader.onloadend = () => {
+      this.$emit('onLoad', {data: this.data, headers: this.headers})
+    }
 
     reader.onerror = function (ex) {
       console.log(ex);
