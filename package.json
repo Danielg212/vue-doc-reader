@@ -24,7 +24,7 @@
     "sass-loader": "^10.0.2",
     "vue-class-component": "^7.2.5",
     "vue-property-decorator": "^9.0.0",
-    "xlsx": "^0.16.7"
+    "xlsx": "^0.17.0"
   },
   "license": "MIT",
   "repository": {
